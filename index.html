@@ -1,0 +1,360 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>StarzPlay CDN Video Monitoring </title>
+  <script src="https://code.jquery.com/jquery-3.3.1.min.js"></script>
+
+  <!-- <script type="text/javascript" src="https://bitmovin-a.akamaihd.net/bitmovin-player/stable/7.7/bitmovinplayer.js"></script> -->
+
+  <script type="text/javascript" src="https://cdn.jsdelivr.net/npm/bitmovin-player@8/bitmovinplayer.js"></script>
+  <link rel="stylesheet" href="https://starzplay.com/styles/starz_base.css?version=1553594491372">
+
+  <style>
+        .bmpui-ui-watermark {
+      display: none;
+    }
+    table.altrowstable {
+      font-size: 15px;
+      border-width: 1px;
+      border-color: #32383e;
+      border-collapse: collapse;
+      text-transform: uppercase;
+      background-color: #212529;
+      margin-left: auto;
+      margin-right: auto;
+      border: solid 1px;
+      margin-bottom: auto;
+    }
+
+    table.altrowstable th {
+      border-width: 1px;
+      padding: 8px;
+      border-style: solid;
+      border-color: #32383e;
+    }
+
+    table.altrowstable td {
+      border-width: 1px;
+      padding: 8px;
+      border-style: solid;
+      border-color: #32383e;
+    }
+
+    .oddrowcolor {
+      background-color: #d4e3e5;
+    }
+
+    .evenrowcolor {
+      background-color: #343a40;
+    }
+
+    input {
+      width: 300px;
+      font-weight: bold;
+      height: 25px;
+      text-transform: uppercase;
+    }
+
+    select {
+      width: 300px;
+      font-weight: bold;
+      height: 25px;
+    }
+
+
+
+
+
+    /*start AlwaysShowUI*/
+    .bmpui-ui-skin-modern .bmpui-ui-controlbar.bmpui-hidden {
+      opacity: 1;
+      visibility: visible;
+    }
+    /*end AlwaysShowUI*/
+    /*start RainbowUI*/
+    .bmpui-ui-titlebar {
+      filter: brightness(0.4) sepia(1) saturate(1000%) hue-rotate(0deg);
+    }
+    .bmpui-ui-hugeplaybacktogglebutton {
+      filter: brightness(0.4) sepia(1) saturate(1000%) hue-rotate(20deg);
+    }
+    .bmpui-ui-playbacktimelabel {
+      filter: brightness(0.4) sepia(1) saturate(1000%) hue-rotate(300deg);
+    }
+    .bmpui-seekbar-playbackposition-marker {
+      filter: brightness(0.4) sepia(1) saturate(1000%) hue-rotate(40deg);
+    }
+    .bmpui-seekbar-playbackposition {
+      filter: brightness(0.4) sepia(1) saturate(1000%) hue-rotate(60deg);
+    }
+    .bmpui-seekbar-bufferlevel {
+      filter: brightness(0.4) sepia(1) saturate(1000%) hue-rotate(80deg);
+    }
+    .bmpui-seekbar-backdrop {
+      filter: brightness(0.4) sepia(1) saturate(1000%) hue-rotate(100deg);
+    }
+    .bmpui-seekbar-label {
+      filter: brightness(0.4) sepia(1) saturate(1000%) hue-rotate(120deg);
+    }
+    .bmpui-ui-playbacktogglebutton {
+      filter: brightness(0.4) sepia(1) saturate(1000%) hue-rotate(140deg);
+    }
+    .bmpui-ui-volumetogglebutton {
+      filter: brightness(0.4) sepia(1) saturate(1000%) hue-rotate(160deg);
+    }
+    .bmpui-ui-volumeslider {
+      filter: brightness(0.4) sepia(1) saturate(1000%) hue-rotate(180deg);
+    }
+    .bmpui-ui-casttogglebutton {
+      filter: brightness(0.4) sepia(1) saturate(1000%) hue-rotate(200deg);
+    }
+    .bmpui-ui-settingstogglebutton {
+      filter: brightness(0.4) sepia(1) saturate(1000%) hue-rotate(220deg);
+    }
+    .bmpui-ui-fullscreentogglebutton {
+      filter: brightness(0.4) sepia(1) saturate(1000%) hue-rotate(240deg);
+    }
+    .bmpui-ui-settings-panel {
+      filter: brightness(0.4) sepia(1) saturate(1000%) hue-rotate(260deg);
+    }
+    /*end RainbowUI*/
+    /*start AlwaysShowUI*/
+    .bmpui-ui-skin-modern .bmpui-ui-controlbar.bmpui-hidden {
+      opacity: 1;
+      visibility: visible;
+    }
+
+    #player {
+      max-width: 900px;
+      width: 90%;
+      margin: auto;
+      -webkit-box-shadow: 0px 0px 56px 0px rgba(0, 0, 0, 0.75);
+      -moz-box-shadow: 0px 0px 56px 0px rgba(0, 0, 0, 0.75);
+      box-shadow: 0px 0px 56px 0px rgba(0, 0, 0, 0.75);
+      margin-top: 10px;
+      margin-bottom: 10px;
+    }
+
+    /*end AlwaysShowUI*/
+  </style>
+</head>
+<body >
+<div >
+  <table style="text-align: right;margin: 20px;" align="right">
+    <tr>
+      <td><a style='float:right;margin: 15px;font-weight: bold;' href="/video/main">Back to Search</a></td>
+      <td>&nbsp; | &nbsp; </td>
+      <td> <a style='float:right;margin: 15px;font-weight: bold;' href="/video/login">Logout</a></td>
+    </tr>
+  </table>
+
+</div>
+<div style="margin-left: auto; margin-right: auto; margin-top: 20px; height: 100px;">
+
+  <a href="/video/login" id="headerLogo" class="starzplay-logo ">
+    <svg id="starzplay" class="Header-logo" xmlns="http://www.w3.org/2000/svg" width="250" height="42" viewBox="0 0 310.1 43.9">
+      <path d="M76.3 28.8l5.2-10.4 5.2 10.4H76.3zM60.1 43.1h9l3.3-6.6h18.3l3.3 6.6h9L81.6.7 60.1 43.1zM67.8.9H34.2v7.7h12.5v34.5h8.6V8.6h12.5zM119.8 19.4h-6.2V8.6h6.2c4.6 0 7.1 1.9 7.1 5.4s-2.6 5.4-7.1 5.4m15.8-5.6c0-3.7-1.3-6.9-3.9-9.2-2.6-2.4-6.4-3.7-10.8-3.7H105v42.2h8.6V27.7h6.1l8.9 15.4h9.8l-10-17.5c6.3-2.9 7.2-8.7 7.2-11.8M177 .9h-34.9v7.7H162l-21.6 34.5h36.1v-7.7h-21.2zM19.1 18.1c-6.9-1.6-9.4-2.8-9.4-6 0-2.7 2.5-4.4 6.1-4.4 5.6 0 10.6 3.9 12 5l3.6-7.3C26.9 2 21.8.2 15.9.2 7.3.2 1.2 5.3 1.2 12.7c0 8.1 5.2 10.9 14.2 13 7.5 1.7 8.9 3.2 8.9 5.7 0 2.9-2.6 4.7-6.7 4.7-5 0-9.1-1.9-13.9-6.3L.2 37.3c4.9 4.2 10.9 6.4 17.2 6.4 9.3 0 15.3-5 15.3-13 0-6.5-3.9-10.2-13.6-12.6M183.3.9h13.9c7.4 0 12.8 4.6 12.8 12.3s-5.5 12.4-12.8 12.4h-11.3v17.5h-2.6V.9zM197 23.2c6.2 0 10.3-3.7 10.3-10s-4.1-9.9-10.3-9.9h-11.2v19.9H197zM219 .9h2.6v39.8h20.1v2.4H219V.9zM270.4 28.5h-17.9L247 43.1h-2.8L260 .9h2.8l15.8 42.2h-2.8l-5.4-14.6zm-9-24.6s-.9 3.3-1.6 5.1l-6.5 17.1h16.1L263.1 9c-.7-1.8-1.6-5.1-1.6-5.1h-.1zM292.4 24.8 278 .9h3l10 16.6c1.2 2.1 2.6 4.8 2.6 4.8h.1s1.3-2.7 2.6-4.8l10-16.6h3L295 24.8v18.3h-2.6V24.8z"></path></svg></a>
+
+
+</div>
+<div style="vertical-align: top;">
+
+  <table class="altrowstable" style="width: 1080px;">
+    <tr>
+      <td colspan="2" style="text-align: center; height: 100px;">
+        <h2 class="Heading--carousel" style="margin: auto; width: 40%;">CDN Video Monitoring</h2>
+
+
+      </td>
+    </tr>
+
+    <tr>
+      <td colspan="2" style="text-align: center;">
+
+        <div id="player"></div>
+      </td>
+    </tr>
+    <tr>
+      <td   style="text-align:center;">
+        <img id="idPoster" style="width:100%"><br /><br />
+      </td>
+      <td   style="text-align:center;">
+
+        <img id="idHeroMain" style="width:90%"><br /><br />
+        <img id="idHero" style="width:90%"><br /><br />
+
+
+      </td>
+
+    </tr>
+
+  </table>
+
+</div>
+
+
+<script type="text/javascript">
+
+  let contentId = "";
+  let globalUserId = "d2ef68bad5fa4763b170c9ed4e686cb3-lgi";
+  let Authorization = "Bearer spx-v1.eyJpc3MiOiJkMmVmNjhiYWQ1ZmE0NzYzYjE3MGM5ZWQ0ZTY4NmNiMy1sZ2kiLCJlbnYiOiJsZ2ktZGV2IiwiaWF0IjoxNzEyMDQxMTEwfQ.Dn-EDQvzn1K-GDT3vgrAHz9fQA_MnhkSv8zsib_uH2M";
+
+  let baseUrl = "https://lgi-dev-api.aws.playco.com/";
+  let feedurl = `${baseUrl}api/v1.0/mediaCatalog/titles/movies/${contentId}/?lang=en&userId=${globalUserId}&parentalControl=18&mediaAssetTypes=dash_widevine_spa`;
+
+  let StreamingURL="";
+  let pid = "";
+  let mpxToken = '';
+
+  $(document).ready(function () {
+    contentId = window.location.search.split("=")[1];
+    debugger;
+    getMPX_Token();
+  });
+
+
+
+  function getMPX_Token()
+  {
+    var mpxTokenUrl = baseUrl + "api/v0.2/userAccounts/" + globalUserId;
+    $.ajax({
+      url: mpxTokenUrl,
+      type: "GET",
+      returnHeaders: true,
+      headers: {
+        'Authorization': Authorization
+      },
+      success: function (data, reply, request) {
+        mpxToken = request.getResponseHeader("x-peg-media-access-token");
+        fetchContentDetail();
+
+      },
+      error: function (request, textStatus, errorThrown) {
+        alert("Error During Getting MPX TOKEN");
+      }
+
+    });
+  }
+
+  function fetchContentDetail()
+  {
+
+
+    $.ajax({
+      url: feedurl,
+      type: "GET",
+      success: function (data) {
+        streamingUrl = data.titles[0].media[0].content[0].streamingUrl;
+        streamingUrl = streamingUrl.replace("https://li-jit-cdn-lb.lionsgateplay.com", "https://lgi-jit-usp.lionsgateplay.com");
+        pid = data.titles[0].media[0].content[0].releases[0].pid;
+        PlayContent();
+
+      }
+    });
+
+
+
+
+  }
+
+  function PlayContent() {
+
+    var voultoTokenUrl = `${baseUrl}api/v0.2/externalAuthorization/drmToken/vualto?globalUserId=${globalUserId}`;
+
+    var Key_id = null;
+
+    $.ajax({
+      url: voultoTokenUrl,
+      type: "POST",
+      contentType: "application/json",
+      headers: {
+        'Authorization': Authorization,
+        'Content-type': 'application/json'
+      },
+      data: JSON.stringify({ "auth": mpxToken, "releasePids": [pid], "protectionScheme":"widevine"}),
+      dataType : 'json',
+      success: function (res, status) {
+        DRMTOKEN = res.token;
+
+
+        //////////////// start player code/////////////////
+
+        var playerConfig = {
+          key: "9c89f7d3-2fe7-4986-aaaf-dacaf8f37b93",
+          playback: {
+            muted: true,
+            autoplay: true
+          }
+        };
+        var sourceConfig = {
+          title: "",
+          description: "",
+          dash: streamingUrl,
+          hls: streamingUrl,
+          progressive: 'https://bitmovin-a.akamaihd.net/content/MI201109210084_1/MI201109210084_mpeg-4_hd_high_1080p25_10mbits.mp4',
+          poster: 'https://bitmovin-a.akamaihd.net/content/MI201109210084_1/poster.jpg'
+          ,drm: {
+            widevine: {
+              LA_URL: "https://widevine-proxy.drm.technology/proxy",
+              // LA_URL: "https://kb2f6cs6q7.execute-api.eu-west-1.amazonaws.com/proxy",
+              prepareMessage: function (keyMessage) {
+                return JSON.stringify({
+                  token: DRMTOKEN,
+                  drm_info: Array.apply(null, new Uint8Array(keyMessage.message)),
+                  kid: Key_id
+
+                });
+              }
+            },
+            fairplay: {
+              LA_URL: "https://fairplay-license.drm.technology/license",
+              certificateURL: "https://fairplay-license.drm.technology/certificate",
+              certificateHeaders: [{
+                name: 'x-vudrm-token',
+                value: DRMTOKEN
+              }],
+              headers: [{
+                name: 'Content-Type',
+                value: 'application/json'
+              }],
+              prepareMessage: function (keyMessageEvent, keySession) {
+                return JSON.stringify({
+                  token: DRMTOKEN,
+                  contentId: keySession.contentId,
+                  payload: keyMessageEvent.messageBase64Encoded
+                });
+              },
+              prepareContentId: function(rawContentId) {
+                var tmp = rawContentId.split('/');
+                return tmp[tmp.length - 1];
+              },
+              prepareCertificate: function(cert) {
+                return new Uint8Array(cert);
+              },
+              prepareLicense: function(license) {
+                return new Uint8Array(license);
+              },
+              licenseResponseType: 'arraybuffer'
+            }
+          }
+        };
+
+        var player = new bitmovin.player.Player(document.getElementById('player'), playerConfig);
+        player.load(sourceConfig);
+
+
+        //////////////// end player code/////////////////
+
+      }
+    });
+
+
+  }
+
+
+
+</script>
+
+</body>
+</html>
