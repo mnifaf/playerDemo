@@ -3,6 +3,9 @@
 <head>
   <meta charset="UTF-8">
   <title>StarzPlay CDN Video Monitoring </title>
+  <meta name="googlebot" content="noindex">
+  <meta name="robots" content="noindex,nofollow,noarchive" />
+
   <script src="https://code.jquery.com/jquery-3.3.1.min.js"></script>
 
   <!-- <script type="text/javascript" src="https://bitmovin-a.akamaihd.net/bitmovin-player/stable/7.7/bitmovinplayer.js"></script> -->
@@ -11,7 +14,7 @@
   <link rel="stylesheet" href="https://starzplay.com/styles/starz_base.css?version=1553594491372">
 
   <style>
-        .bmpui-ui-watermark {
+    .bmpui-ui-watermark {
       display: none;
     }
     table.altrowstable {
@@ -195,38 +198,56 @@
 
 
 <script type="text/javascript">
-
-  let contentId = "";
-  let globalUserId = "d2ef68bad5fa4763b170c9ed4e686cb3-lgi";
-  let Authorization = "Bearer spx-v1.eyJpc3MiOiJkMmVmNjhiYWQ1ZmE0NzYzYjE3MGM5ZWQ0ZTY4NmNiMy1sZ2kiLCJlbnYiOiJsZ2ktZGV2IiwiaWF0IjoxNzEyMDQxMTEwfQ.Dn-EDQvzn1K-GDT3vgrAHz9fQA_MnhkSv8zsib_uH2M";
-
-  let baseUrl = "https://lgi-dev-api.aws.playco.com/";
-  let feedurl = `${baseUrl}api/v1.0/mediaCatalog/titles/movies/${contentId}/?lang=en&userId=${globalUserId}&parentalControl=18&mediaAssetTypes=dash_widevine_spa`;
-
-  let StreamingURL="";
-  let pid = "";
-  let mpxToken = '';
+  var env = "spstg";
+  var tenantObject = {
+    spprod: {
+      baseUrl: "https://api.aws.playco.com/",
+      globalUserId: "49f394b1d2f94d0293c51aac93a6a762-sp",
+      Authorization: "Bearer spx-v1.eyJpc3MiOiI0OWYzOTRiMWQyZjk0ZDAyOTNjNTFhYWM5M2E2YTc2Mi1zcCIsImVudiI6InNwLXByb2QiLCJpYXQiOjE3MTUwNjc0NDR9.vEvkLL9r2ULB7SlBt_zk7Hr_4TApApUDvWk4qfcBu5E",
+    },
+    spstg: {
+      baseUrl: "https://stg-api.aws.playco.com/",
+      globalUserId: "6b23bd4e7e9240138bd46ba8918f7dc4-sp",
+      Authorization: "Bearer spx-v1.eyJpc3MiOiI2YjIzYmQ0ZTdlOTI0MDEzOGJkNDZiYTg5MThmN2RjNC1zcCIsImVudiI6InNwLXN0ZyIsImlhdCI6MTcxNTE2ODY3MX0.N1QCMgpv8mx1SrGEqXvk-fk81J19NhOVxE-zpiZoxUI",
+    },
+    lg: {
+      baseUrl: "https://lgi-dev-api.aws.playco.com/",
+      globalUserId: "d2ef68bad5fa4763b170c9ed4e686cb3-lgi",
+       Authorization: "Bearer spx-v1.eyJpc3MiOiJkMmVmNjhiYWQ1ZmE0NzYzYjE3MGM5ZWQ0ZTY4NmNiMy1sZ2kiLCJlbnYiOiJsZ2ktZGV2IiwiaWF0IjoxNzEyMDQxMTEwfQ.Dn-EDQvzn1K-GDT3vgrAHz9fQA_MnhkSv8zsib_uH2M",
+    }
+  }
+  var streamingUrl;
+  var contentId;
+  var feedurl;
+  var pid;
+  var mpxToken;
+  var DRMTOKEN;
 
   $(document).ready(function () {
-    contentId = window.location.search.split("=")[1];
-    debugger;
-    getMPX_Token();
+     var urlParams = new URLSearchParams(window.location.search);
+     contentId = urlParams.get('id');
+      if(urlParams.get('env')) {
+        env = urlParams.get('env') ;
+      }
+      feedurl = `${tenantObject[env].baseUrl}api/v1.0/mediaCatalog/titles/movies/${contentId}/?lang=en&userId=${tenantObject[env].globalUserId}&parentalControl=18&mediaAssetTypes=dash_widevine_spa`;
+      getMPX_Token();
   });
 
 
 
   function getMPX_Token()
   {
-    var mpxTokenUrl = baseUrl + "api/v0.2/userAccounts/" + globalUserId;
+    var mpxTokenUrl = tenantObject[env].baseUrl + "api/v0.2/userAccounts/" + tenantObject[env].globalUserId;
     $.ajax({
       url: mpxTokenUrl,
       type: "GET",
       returnHeaders: true,
       headers: {
-        'Authorization': Authorization
+        'Authorization': tenantObject[env].Authorization
       },
       success: function (data, reply, request) {
         mpxToken = request.getResponseHeader("x-peg-media-access-token");
+        console.log("1: mpxToken", mpxToken);
         fetchContentDetail();
 
       },
@@ -245,8 +266,16 @@
       url: feedurl,
       type: "GET",
       success: function (data) {
+        console.log("2: content Details => ", data)
         streamingUrl = data.titles[0].media[0].content[0].streamingUrl;
-        streamingUrl = streamingUrl.replace("https://li-jit-cdn-lb.lionsgateplay.com", "https://lgi-jit-usp.lionsgateplay.com");
+        if(env === "sp") {
+          streamingUrl = streamingUrl.replace("http://mena-jit-cdn-lb.aws.playco.com", "https://starzplay-jit-prod-ssl.akamaized.net");
+        } else {
+          streamingUrl = streamingUrl.replace("https://li-jit-cdn-lb.lionsgateplay.com", "https://lgi-jit-usp.lionsgateplay.com");
+        }
+        // streamingUrl = "https://sps3.starzplayarabia.com/out/v1/95528122fa434bcd948c9ed2e7afabee/index.mpd?start=1727186400"
+        console.log("3: streamingUrl", streamingUrl);
+        console.log("3: streamingUrl", streamingUrl);
         pid = data.titles[0].media[0].content[0].releases[0].pid;
         PlayContent();
 
@@ -260,8 +289,8 @@
 
   function PlayContent() {
 
-    var voultoTokenUrl = `${baseUrl}api/v0.2/externalAuthorization/drmToken/vualto?globalUserId=${globalUserId}`;
-
+    var voultoTokenUrl = `${tenantObject[env].baseUrl}api/v0.2/externalAuthorization/drmToken/vualto?globalUserId=${tenantObject[env].globalUserId}`;
+    console.log("4: voultoTokenUrl", voultoTokenUrl);
     var Key_id = null;
 
     $.ajax({
@@ -269,13 +298,14 @@
       type: "POST",
       contentType: "application/json",
       headers: {
-        'Authorization': Authorization,
+        'Authorization': tenantObject[env].Authorization,
         'Content-type': 'application/json'
       },
       data: JSON.stringify({ "auth": mpxToken, "releasePids": [pid], "protectionScheme":"widevine"}),
       dataType : 'json',
       success: function (res, status) {
         DRMTOKEN = res.token;
+        console.log("5: DRM token", DRMTOKEN);
 
 
         //////////////// start player code/////////////////
@@ -293,8 +323,8 @@
           dash: streamingUrl,
           hls: streamingUrl,
           progressive: 'https://bitmovin-a.akamaihd.net/content/MI201109210084_1/MI201109210084_mpeg-4_hd_high_1080p25_10mbits.mp4',
-          poster: 'https://bitmovin-a.akamaihd.net/content/MI201109210084_1/poster.jpg'
-          ,drm: {
+          poster: 'https://bitmovin-a.akamaihd.net/content/MI201109210084_1/poster.jpg',
+          drm: {
             widevine: {
               LA_URL: "https://widevine-proxy.drm.technology/proxy",
               // LA_URL: "https://kb2f6cs6q7.execute-api.eu-west-1.amazonaws.com/proxy",
@@ -337,12 +367,50 @@
               },
               licenseResponseType: 'arraybuffer'
             }
-          }
+          },
+          tweaks: {
+            file_protocol: true,
+            // app_id: getAppId(),
+            BACKWARD_BUFFER_PURGE_INTERVAL: 10,
+            DWORD_BASE_MEDIA_DECODE_TIMESTAMPS: true,
+            PROACTIVE_GAP_SKIP_DISTANCE_SECONDS: 0.1,
+            max_mpd_retries: 3,
+            max_cdn_retries: 3,
+            max_retries: 3,
+            context_menu_entries: [], // No right click button shit
+            ieXmlParserFix: true,
+            enable_seek_for_live: true
+          },
         };
-
+        console.log("6: Start Player")
         var player = new bitmovin.player.Player(document.getElementById('player'), playerConfig);
-        player.load(sourceConfig);
+        window.mnifaf = player;
+        window.mnifaf.load(sourceConfig);
 
+
+        player.on(bitmovin.player.PlayerEvent.TimeShif, function(seekEvent) {
+          console.log("TimeShift");
+        });
+        player.on(bitmovin.player.PlayerEvent.Seek, function(seekEvent) {
+          console.log(seekEvent);
+          console.log(JSON.stringify(player.getCurrentTime()));
+        });
+        player.on(bitmovin.player.PlayerEvent.Seeked, function(seekEvent) {
+          console.log(seekEvent);
+          console.log(JSON.stringify(this.player.getCurrentTime()));
+        });
+        player.on(bitmovin.player.PlayerEvent.onTimeShift, function(seekEvent) {
+          console.log("onTimeShift");
+        });
+        player.on(bitmovin.player.PlayerEvent.onStallStarted, function(seekEvent) {
+          console.log("onStallStarted");
+        });
+        player.on(bitmovin.player.PlayerEvent.onStallEnded, function(seekEvent) {
+          console.log("onStallEnded");
+        });
+        player.on(bitmovin.player.PlayerEvent.onTimeShifted, function(seekEvent) {
+          console.log("onTimeShifted");
+        });
 
         //////////////// end player code/////////////////
 
@@ -351,9 +419,6 @@
 
 
   }
-
-
-
 </script>
 
 </body>
